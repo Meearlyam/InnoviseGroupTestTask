@@ -16,3 +16,6 @@ When you launch this app, you will see the following menu items:
  
  To perform an operation, you need to enter its number, press "Enter", and follow the instructions. 
  Mind that entering any symbols other than the menu item numbers will not give any result.
+ 
+ ### Users data file
+All users data is stored in src/main/resources/users.txt file. It changes after each create, update or delete user operation.
