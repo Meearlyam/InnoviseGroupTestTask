@@ -70,6 +70,10 @@ public class FileUsersRepository implements UsersRepository {
             String userLine = usersFile.readLine();
             int userId = 0;
             while(userLine != null) {
+                if(userLine.length() == 0 || (userLine.split("[ ]+").length == 0)) {
+                    userLine = usersFile.readLine();
+                    continue;
+                }
                 users.add(
                         userParser.parseUser(userId, userLine)
                 );
