@@ -57,10 +57,20 @@ public class Main {
         outputStream = System.out;
     }
 
+    private static int parseUserIdFromInput(String input) {
+        int userId;
+        try {
+            userId = Integer.parseInt(input);
+        } catch (Exception e) {
+            userId = -1;
+        }
+        return userId;
+    }
+
     public static void main(String[] args) {
         configureApp();
 
-        String commandChoice = "";
+        String commandChoice;
         String userString;
         int userId;
         User user;
@@ -71,63 +81,23 @@ public class Main {
 
         try {
             new ReadAllUsersCommand(controller, users).execute();
-        }
-        catch (CommandExecutionException e) {
-            outputStream.println(
-                    String.format("Exception was thrown in Main: %s.", e.getMessage())
-            );
-        }
 
-        while (true) {
-            try {
+            while (true) {
+
                 outputStream.println(MAIN_MENU_STRING);
                 commandChoice = inputReader.readLine();
-            }
-            catch (IOException e) {
-                outputStream.println("Cannot read line from input.");
-            }
 
-            switch (commandChoice) {
-                case "1":
-                    outputStream.println("CREATE USER: ");
+                switch (commandChoice) {
+                    case "1":
+                        outputStream.println("CREATE USER: ");
 
-                    do {
-                        isInputInvalid = false;
-                        try {
-                            outputStream.println(ENTER_USER_STRING);
-                            userString = inputReader.readLine();
-
-                            command = new CreateUserCommand(controller, users.size(), userString);
-                            command.execute();
-                        } catch (CommandExecutionException | IOException e) {
-                            isInputInvalid = true;
-                            outputStream.println(TRY_ENTER_AGAIN_STRING);
-                        }
-                    } while (isInputInvalid);
-
-                    outputStream.println("User has been created.");
-                    break;
-
-                case "2":
-                    outputStream.print(
-                            String.format(OPERATION_WITH_ID_TEMPLATE, "UPDATE USER", users.size() - 1)
-                    );
-                    outputStream.println(ENTER_USER_ID_STRING);
-                    try {
-                        userId = Integer.parseInt(inputReader.readLine());
-                    }
-                    catch (Exception e) {
-                        userId = -1;
-                    }
-
-                    if (userId >= 0 && userId < users.size()) {
                         do {
                             isInputInvalid = false;
                             try {
                                 outputStream.println(ENTER_USER_STRING);
                                 userString = inputReader.readLine();
 
-                                command = new UpdateUserCommand(controller, userId, userString);
+                                command = new CreateUserCommand(controller, users.size(), userString);
                                 command.execute();
                             } catch (CommandExecutionException | IOException e) {
                                 isInputInvalid = true;
@@ -135,25 +105,46 @@ public class Main {
                             }
                         } while (isInputInvalid);
 
-                        outputStream.println("User has been updated.");
-                    } else {
-                        outputStream.println(NO_SUCH_USER_STRING);
-                    }
-                    break;
+                        outputStream.println("User has been created.");
+                        break;
 
-                case "3":
-                    outputStream.print(
-                            String.format(OPERATION_WITH_ID_TEMPLATE, "DELETE USER", users.size() - 1)
-                    );
-                    outputStream.println(ENTER_USER_ID_STRING);
-                    try {
-                        userId = Integer.parseInt(inputReader.readLine());
-                    }
-                    catch (Exception e) {
-                        userId = -1;
-                    }
+                    case "2":
+                        outputStream.print(
+                                String.format(OPERATION_WITH_ID_TEMPLATE, "UPDATE USER", users.size() - 1)
+                        );
+                        outputStream.println(ENTER_USER_ID_STRING);
 
-                    try {
+                        userId = parseUserIdFromInput(inputReader.readLine());
+
+                        if (userId >= 0 && userId < users.size()) {
+                            do {
+                                isInputInvalid = false;
+                                try {
+                                    outputStream.println(ENTER_USER_STRING);
+                                    userString = inputReader.readLine();
+
+                                    command = new UpdateUserCommand(controller, userId, userString);
+                                    command.execute();
+                                } catch (CommandExecutionException | IOException e) {
+                                    isInputInvalid = true;
+                                    outputStream.println(TRY_ENTER_AGAIN_STRING);
+                                }
+                            } while (isInputInvalid);
+
+                            outputStream.println("User has been updated.");
+                        } else {
+                            outputStream.println(NO_SUCH_USER_STRING);
+                        }
+                        break;
+
+                    case "3":
+                        outputStream.print(
+                                String.format(OPERATION_WITH_ID_TEMPLATE, "DELETE USER", users.size() - 1)
+                        );
+                        outputStream.println(ENTER_USER_ID_STRING);
+
+                        userId = parseUserIdFromInput(inputReader.readLine());
+
                         if (userId >= 0 && userId < users.size()) {
                             command = new DeleteUserCommand(controller, userId);
                             command.execute();
@@ -161,27 +152,16 @@ public class Main {
                         } else {
                             outputStream.println(NO_SUCH_USER_STRING);
                         }
-                    }
-                    catch (CommandExecutionException e) {
-                        outputStream.println(
-                                String.format("Delete user in Main exception: %s", e.getMessage())
+                        break;
+
+                    case "4":
+                        outputStream.print(
+                                String.format(OPERATION_WITH_ID_TEMPLATE, "READ USER", users.size() - 1)
                         );
-                    }
-                    break;
+                        outputStream.println(ENTER_USER_ID_STRING);
 
-                case "4":
-                    outputStream.print(
-                            String.format(OPERATION_WITH_ID_TEMPLATE, "READ USER", users.size() - 1)
-                    );
-                    outputStream.println(ENTER_USER_ID_STRING);
-                    try {
-                        userId = Integer.parseInt(inputReader.readLine());
-                    }
-                    catch (Exception e) {
-                        userId = -1;
-                    }
+                        userId = parseUserIdFromInput(inputReader.readLine());
 
-                    try {
                         if (userId >= 0 && userId < users.size()) {
                             user = new User(userId);
                             command = new ReadUserByIdCommand(controller, user, userId);
@@ -190,36 +170,29 @@ public class Main {
                         } else {
                             outputStream.println(NO_SUCH_USER_STRING);
                         }
-                    }
-                    catch (CommandExecutionException e) {
-                        outputStream.println(
-                                String.format("Read user by id in Main exception: %s", e.getMessage())
-                        );
-                    }
+                        break;
 
-                    break;
+                    case "5":
+                        outputStream.println("READ ALL USERS:");
 
-                case "5":
-                    outputStream.println("READ ALL USERS:");
-                    try {
                         command = new ReadAllUsersCommand(controller, users);
                         command.execute();
                         for (User usr : users) {
                             outputStream.println(usr);
                         }
-                    }
-                    catch (CommandExecutionException e) {
-                        outputStream.println(
-                                String.format("Read all users in Main exception: %s", e.getMessage())
-                        );
-                    }
-                    break;
+                        break;
 
-                case "6":
-                    return;
-                default:
-                    break;
+                    case "6":
+                        return;
+                    default:
+                        break;
+                }
             }
+        }
+        catch (CommandExecutionException | IOException e) {
+            outputStream.println(
+                    String.format("Exception was thrown in Main: %s.", e.getMessage())
+            );
         }
     }
 }
